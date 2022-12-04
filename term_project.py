@@ -464,6 +464,150 @@ def work_majorview():
         print(e)
 
 
+def manager_regist():
+    mknum, mkname, mkphone, birth, company = input(
+        "담당자 번호, 이름, 휴대폰 번호(010-XXXX-XXXX), 생년월일(8자리), 회사명을 입력해주세요").split()
+
+    try:
+        print(
+            f'담당자 번호={mknum} 이름={mkname} 휴대폰 번호={mkphone} 생년월일={birth} 회사명={company}')
+        print("정확히 입력하셨습니까? y/n")
+        sel = input()
+        if sel == 'y':
+            sql = "insert into manager values(%s,%s,%s,%s,%s)"
+            vals = (mknum, mkname, mkphone, birth, company,)
+            cur.execute(sql, vals)
+            print("[등록완료]")
+        elif sel == 'n':
+            print("등록취소")
+        else:
+            print("잘못입력하셨습니다.")
+        sleep(5)
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def manager_companyview():
+
+    try:
+        # 회사명 받기
+        show = input("담당자를 조회하고 싶은 회사명을 입력해주세요: ")
+        print(f'조회하고 싶으신 회사가 {show} 맞습니까? y/n')
+        sel = input()
+        if sel == 'y':
+            print(
+                f'[   회사명 : {show}                                        ]')
+            print("----------------------------------------------------------------")
+
+            # 컬럼명 뽑기
+            a = list()
+            i = 0
+            cur.execute(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='manager'")
+            row = cur.fetchone()
+            while row:
+                a.insert(i, row[0])
+                row = cur.fetchone()
+                i += 1
+            print(a)
+
+            # 회사별 담당자 표시
+            cur.execute(f'select * from manager where mCompany="{show}"')
+            rows = cur.fetchall()
+            for item in rows:
+                print(
+                    f'\t{item[0]} \t{item[1]}\t{item[2]}\t{item[3]}\t{item[4]}')
+            print("----------------------------------------------------------------")
+
+        elif sel == 'n':
+            print("[조회취소]")
+        else:
+            print("잘못입력하셨습니다.")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def company_regist():
+    companyName, companyPhone = input(" 회사 이름, 회사 전화번호(XXX-XXXX-XXXX)").split()
+
+    try:
+        print(
+            f'회사 이름={companyName} 회사 전화번호={companyPhone}')
+        print("정확히 입력하셨습니까? y/n")
+        sel = input()
+        if sel == 'y':
+            sql = "insert into company values(%s,%s)"
+            vals = (companyName, companyPhone,)
+            cur.execute(sql, vals)
+            print("[등록완료]")
+        elif sel == 'n':
+            print("등록취소")
+        else:
+            print("잘못입력하셨습니다.")
+        sleep(5)
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def company_count():
+
+    try:
+        cur.execute(
+            "select manager.mCompany, count(work.workID)as Total_work from manager join work on work.managerID = manager.managerID group by manager.mCompany;")
+        print(" ")
+        print("[회사별 실적 조회]]")
+        rows = cur.fetchall()
+        for item in rows:
+            print(f'회사 "{item[0]}"은 현재 총 {item[1]}건의 업무를 진행하였습니다.')
+        print("----------------------------------------------------------------")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def major_all():
+
+    try:
+        cur.execute("select * from major")
+        rows = cur.fetchall()
+        print(" ")
+        print("[전체 업무 목록]")
+
+        for item in rows:
+            print(f'{item[0]}의 단가 :  {item[1]}원')
+        print("----------------------------------------------------------------")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def major_update():
+
+    try:
+        print("----------------------------------------------------------------")
+        wnum = input("가격을 변동하고자하는 업무명을 입력해주세요 : ")
+        cost = input(f'{wnum}를 얼마로 바꾸시겠습니까? :')
+        sel = input(f'{wnum}를 {cost}원로 바꾸시는게 맞습니까?(y/n)')
+        if sel == 'y':
+            cur.execute(
+                f'update major set wCost={cost} where MajorName="{wnum}"')
+            print("[변경완료]")
+        elif sel == 'n':
+            print("[변경취소]")
+        else:
+            print("잘못입력하셨습니다.")
+        sleep(5)
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
 def managerpage():
     while (1):
         print("----------------------  DB 일용 근로 계약  ----------------------")
@@ -476,14 +620,13 @@ def managerpage():
         print(" 7. 예약된 근무 조회                                             ")
         print("")
         print(" [담당자 관리]                                                  ")
-        print(" 8.담당자 등록                      9.업무별 담당자 조회          ")
-        print(" 10.회사별 담당자 조회                                           ")
+        print(" 8.담당자 등록                      9.회사별 담당자 조회          ")
         print("")
         print(" [회사 관리]                                                     ")
-        print(" 11.회사 등록                       12.회사별 실적 조회           ")
+        print(" 10.회사 등록                       11.회사별 실적 조회           ")
         print("")
-        print(" [업무 관리]                              ")
-        print(" 13.업무 종류 조희                   14.업무 가격 수정           ")
+        print(" [업무 관리]                                                    ")
+        print(" 12.업무 종류 조회                   13.업무 가격 수정           ")
         print("")
         print("                            99.종료하기                          ")
         print("----------------------------------------------------------------")
@@ -504,19 +647,17 @@ def managerpage():
         elif m_menu == '7':
             work_appointment_worker()
         elif m_menu == '8':
-            break
+            manager_regist()
         elif m_menu == '9':
-            break
+            manager_companyview()
         elif m_menu == '10':
-            break
+            company_regist()
         elif m_menu == '11':
-            break
+            company_count()
         elif m_menu == '12':
-            break
+            major_all()
         elif m_menu == '13':
-            break
-        elif m_menu == '14':
-            break
+            major_update()
         elif m_menu == '99':
             break
     return 0
