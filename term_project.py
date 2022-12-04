@@ -59,7 +59,7 @@ def worker_delete():
         while row:
             print(row)
             row = cur.fetchone()
-        print("----------------------------------------------")
+        print("----------------------------------------------------------------")
         print("삭제하고 싶은 근무자의 근무자 번호를 입력하세요")
         wknum = input("번호를 입력하세요 : ")
         print(f'삭제하고 싶으신 근무자의 번호가 {wknum}번 맞습니까? y/n')
@@ -101,7 +101,7 @@ def work_regist():
         print(e)
 
 
-def work_all():
+def work_worker():
 
     try:
         cur.execute("select * from work")
@@ -125,17 +125,103 @@ def work_delete():
         cur.execute("select * from work")
         row = cur.fetchone()
         print(" ")
-        print("[전체 근로자 목록]")
+        print("[전체 근무 목록]")
         while row:
             print(row)
             row = cur.fetchone()
-        print("----------------------------------------------")
-        print("삭제하고 싶은 근무자의 근무자 번호를 입력하세요")
+        print("----------------------------------------------------------------")
+        print("삭제하고 싶은 근무의 근무 번호를 입력하세요")
         wnum = input("번호를 입력하세요 : ")
         print(f'삭제하고 싶으신 근무자의 번호가 {wnum}번 맞습니까? y/n')
         sel = input()
         if sel == 'y':
             sql = "delete from worker where workID = %s"
+            vals = (wnum,)
+            cur.execute(sql, vals)
+            print("[삭제완료]")
+        elif sel == 'n':
+            print("[삭제취소]")
+        else:
+            print("잘못입력하셨습니다.")
+        sleep(5)
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_appointment_regist():
+    print("예약 번호, 예약 날짜(8자리), 근무자 번호, 관리자 번호, 전공명을 입력해주세요")
+    wpnum, wpday, wknum, mnum, major = input("입력해주세요 : ").split()
+
+    try:
+        print(
+            f'예약 번호={wpnum} 예약 날짜={wpday} 근무자 번호={wknum} 관리자 번호={mnum} 전공명={major}')
+        print("정확히 입력하셨습니까? y/n")
+        sel = input()
+        if sel == 'y':
+            sql = "insert into work_appointment values(%s,%s,%s,%s,%s)"
+            vals = (wpnum, wpday, wknum, mnum, major,)
+            cur.execute(sql, vals)
+            print("[예약완료]")
+        elif sel == 'n':
+            print("[예약취소]")
+        else:
+            print("잘못입력하셨습니다.")
+        sleep(5)
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_appointment_worker():
+
+    try:
+        # 근무자 번호, 근무자명 뽑기
+        show = input("예약 조회하고 싶은 근무자의 근무자 번호를 입력해주세요 :")
+        cur.execute(f'select worker.wName from worker where workerID={show}')
+        row = cur.fetchone()
+        print(" ")
+        while row:
+            print(
+                f'[   근무자 번호 : {show}  근무자 : {row[0]}                            ]')
+            print(
+                "----------------------------------------------------------------")
+            row = cur.fetchone()
+
+        # 컬럼명 뽑기
+        a = list()
+        i = 0
+        cur.execute(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='work_appointment'")
+        row = cur.fetchone()
+        while row:
+            a.insert(i, row[0])
+            row = cur.fetchone()
+            i += 1
+        print(a)
+
+        # 근무자ID별 예약 정보 출력
+        cur.execute(f'select * from work_appointment where workerID={show}')
+        rows = cur.fetchall()
+        for item in rows:
+            print(
+                f'\t{item[0]}\t {item[1]}\t{item[2]}\t     {item[3]}\t\t{item[4]}')
+        print("----------------------------------------------------------------")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_appointment_delete():
+
+    try:
+        print("----------------------------------------------------------------")
+        print("삭제하고 싶은 예약 번호를 입력하세요")
+        wnum = input("번호를 입력하세요 : ")
+        print(f'삭제하고 싶으신 예약 번호가 {wnum}번 맞습니까? y/n')
+        sel = input()
+        if sel == 'y':
+            sql = "delete from work_appointment where work_appointID = %s"
             vals = (wnum,)
             cur.execute(sql, vals)
             print("[삭제완료]")
@@ -160,18 +246,18 @@ def firstpage():
 
 def workerpage():
     while (1):
-        print("-------------  DB 일용 근로 계약  -------------")
+        print("----------------------  DB 일용 근로 계약  ----------------------")
         print(" [근무자 관리]                                 ")
-        print(" 1.근무자 등록  2.전체 조회  3.근무자 삭제       ")
-        print("\n")
+        print(" 1.근무자 등록              2.전체 조회           3.근무자 삭제   ")
+        print("")
         print(" [근무 관리]                                   ")
-        print(" 4.근무 등록    5.근무 조회  6.근무 삭제        ")
-        print("\n")
+        print(" 4.근무 등록                5.근무 조회           6.근무 삭제     ")
+        print("")
         print(" [근무 예약 관리]                              ")
-        print(" 7.예약 등록    8.예약 조회  9.예약 삭제        ")
-        print("\n")
-        print("                  99.종료하기                  ")
-        print("----------------------------------------------")
+        print(" 7.예약 등록                8.예약 조회           9.예약 삭제     ")
+        print("")
+        print("                                                   99.종료하기   ")
+        print("----------------------------------------------------------------")
         w_menu = input("메뉴선택: ")
 
         if w_menu == '1':
@@ -183,15 +269,15 @@ def workerpage():
         elif w_menu == '4':
             work_regist()
         elif w_menu == '5':
-            work_all()
+            work_worker()
         elif w_menu == '6':
             work_delete()
         elif w_menu == '7':
-            break
+            work_appointment_regist()
         elif w_menu == '8':
-            break
+            work_appointment_worker()
         elif w_menu == '9':
-            break
+            work_appointment_delete()
         elif w_menu == '99':
             break
     return 0
