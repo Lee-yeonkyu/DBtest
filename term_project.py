@@ -1,9 +1,34 @@
 import pymysql
+from time import sleep
+from datetime import datetime
 
 con = pymysql.connect(host='192.168.113.3', user='yglee', password='1234',
                       database='daily_employment', port=4567, charset='utf8', autocommit=True)
 
 cur = con.cursor()
+
+
+def worker_regist():
+    print("근무자 번호, 이름, 휴대폰 번호(010-XXXX-XXXX), 자격증 보유여부(O,X), 생년월일을 입력해주세요.")
+    wknum, wkname, wkphone, license, birth = input("입력해주세요 : ").split()
+
+    try:
+        print(
+            f'근무자 번호={wknum} 이름={wkname} 휴대폰 번호={wkphone} 자격증={license} 생년월일={birth}')
+        print("정확히 입력하셨습니까? y/n")
+        sel = input()
+        if sel == 'y':
+            sql = "insert into worker values(%s,%s,%s,%s,%s)"
+            vals = (wknum, wkname, wkphone, license, birth,)
+            cur.execute(sql, vals)
+            print("[등록완료]")
+        elif sel == 'n':
+            print("등록취소")
+        else:
+            print("잘못입력하셨습니다.")
+        sleep(5)
+    except pymysql.err.IntegrityError as e:
+        print(e)
 
 
 def firstpage():
@@ -33,8 +58,9 @@ def workerpage():
         w_menu = input("메뉴선택: ")
 
         if w_menu == '1':
-            break
+            worker_regist()
         elif w_menu == '2':
+
             break
         elif w_menu == '3':
             break
@@ -118,12 +144,15 @@ def managerpage():
 
 
 def run():
+
     menu = firstpage()
     if menu == 1:
         workerpage()
     elif menu == 2:
         managerpage()
     elif menu == 99:
+        print("사용을 종료합니다.")
+        con.close()
         return 0
 
 
