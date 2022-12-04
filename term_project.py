@@ -34,14 +34,24 @@ def worker_regist():
 def worker_all():
 
     try:
-        cur.execute("select * from worker")
-        row = cur.fetchone()
-        print(" ")
         print("[전체 근로자 목록]")
+        # 컬럼명 뽑기
+        a = list()
+        i = 0
+        cur.execute(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='worker'")
+        row = cur.fetchone()
         while row:
-            print(row)
+            a.insert(i, row[0])
             row = cur.fetchone()
-        print("----------------------------------------------")
+            i += 1
+        print(a)
+        cur.execute("select * from worker")
+        rows = cur.fetchall()
+        for item in rows:
+            print(
+                f'\t{item[0]}\t {item[1]}\t{item[2]}\t{item[3]}\t{item[4]}')
+        print("----------------------------------------------------------------")
 
         print("돌아가시려면 아무키나 입력해주세요")
         sel = input()
@@ -104,14 +114,37 @@ def work_regist():
 def work_worker():
 
     try:
-        cur.execute("select * from work")
+        # 근무자 번호, 근무자명 뽑기
+        show = input("근무 조회하고 싶은 근무자의 근무자 번호를 입력해주세요 :")
+        cur.execute(f'select worker.wName from worker where workerID={show}')
         row = cur.fetchone()
         print(" ")
-        print("[전체 근무 목록]")
         while row:
-            print(row)
+            print(
+                f'[   근무자 번호 : {show}  근무자 : {row[0]}                            ]')
+            print(
+                "----------------------------------------------------------------")
             row = cur.fetchone()
-        print("----------------------------------------------")
+
+        # 컬럼명 뽑기
+        a = list()
+        i = 0
+        cur.execute(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='work'")
+        row = cur.fetchone()
+        while row:
+            a.insert(i, row[0])
+            row = cur.fetchone()
+            i += 1
+        print(a)
+
+        # 근무자ID별 예약 정보 출력
+        cur.execute(f'select * from work where workerID={show}')
+        rows = cur.fetchall()
+        for item in rows:
+            print(
+                f'{item[0]}\t {item[1]}\t{item[2]}\t     {item[3]}\t\t{item[4]}')
+        print("----------------------------------------------------------------")
 
         print("돌아가시려면 아무키나 입력해주세요")
         sel = input()
