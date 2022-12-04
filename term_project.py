@@ -234,16 +234,6 @@ def work_appointment_delete():
         print(e)
 
 
-def firstpage():
-    print("-------------  DB 일용 근로 계약  -------------")
-    print("                 1.근로자 전용                 ")
-    print("                 2.관리자 전용                 ")
-    print("                 99.사용 종료                  ")
-    print("----------------------------------------------")
-    menu = input("사용자 선택: ")
-    return int(menu)
-
-
 def workerpage():
     while (1):
         print("----------------------  DB 일용 근로 계약  ----------------------")
@@ -283,51 +273,236 @@ def workerpage():
     return 0
 
 
+def worker_pay():
+
+    try:
+        cur.execute(
+            "select work.workerID, worker.wName, SUM(major.wCost) as Total_cost from work join major on major.MajorName = work.majorName join worker on worker.workerID = work.workerID group by work.workerID,worker.wName;")
+        print(" ")
+        print("[근로자 번호별 급여 상황]]")
+        rows = cur.fetchall()
+        for item in rows:
+            print(
+                f'{item[0]}.{item[1]}의 총 급여는 {item[2]}원')
+        print("----------------------------------------------------------------")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_dayview():
+
+    try:
+        # 날짜 받기
+        show = input("근무를 조회하고 싶은 날짜를 입력해주세요(8자리) :")
+        print(f'조회하고 싶으신 날짜가 {show} 맞습니까? y/n')
+        sel = input()
+        if sel == 'y':
+            print(
+                f'[   날짜 : {show}                                        ]')
+            print("----------------------------------------------------------------")
+
+            # 컬럼명 뽑기
+            a = list()
+            i = 0
+            cur.execute(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='work'")
+            row = cur.fetchone()
+            while row:
+                a.insert(i, row[0])
+                row = cur.fetchone()
+                i += 1
+            print(a)
+
+            # 날짜별 근무 표시
+            cur.execute(f'select * from work where wday={show}')
+            rows = cur.fetchall()
+            for item in rows:
+                print(
+                    f'{item[0]}\t {item[1]}\t{item[2]}\t     {item[3]}\t\t{item[4]}')
+            print("----------------------------------------------------------------")
+
+        elif sel == 'n':
+            print("[조회취소]")
+        else:
+            print("잘못입력하셨습니다.")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_managerview():
+
+    try:
+        # 담당자 번호 받기
+        show = input("근무를 조회하고 싶은 담당자 번호를 입력해주세요 :")
+        print(f'조회하고 싶으신 담당자의 번호가 {show} 맞습니까? y/n')
+        sel = input()
+        if sel == 'y':
+            print(
+                f'[   담당자 번호 : {show}                                        ]')
+            print("----------------------------------------------------------------")
+
+            # 컬럼명 뽑기
+            a = list()
+            i = 0
+            cur.execute(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='work'")
+            row = cur.fetchone()
+            while row:
+                a.insert(i, row[0])
+                row = cur.fetchone()
+                i += 1
+            print(a)
+
+            # 담당자ID별 근무 표시
+            cur.execute(f'select * from work where managerID={show}')
+            rows = cur.fetchall()
+            for item in rows:
+                print(
+                    f'{item[0]}\t {item[1]}\t{item[2]}\t     {item[3]}\t\t{item[4]}')
+            print("----------------------------------------------------------------")
+
+        elif sel == 'n':
+            print("[조회취소]")
+        else:
+            print("잘못입력하셨습니다.")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_workerview():
+
+    try:
+        # 근무자 번호, 근무자명 뽑기
+        show = input("근무를 조회하고 싶은 근무자 번호를 입력해주세요 :")
+        print(f'조회하고 싶으신 근무자의 번호가 {show} 맞습니까? y/n')
+        sel = input()
+        if sel == 'y':
+            print(
+                f'[   근무자 번호 : {show}                                        ]')
+            print("----------------------------------------------------------------")
+
+            # 컬럼명 뽑기
+            a = list()
+            i = 0
+            cur.execute(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='work'")
+            row = cur.fetchone()
+            while row:
+                a.insert(i, row[0])
+                row = cur.fetchone()
+                i += 1
+            print(a)
+
+            # 담당자ID별 근무 표시
+            cur.execute(f'select * from work where workerID={show}')
+            rows = cur.fetchall()
+            for item in rows:
+                print(
+                    f'{item[0]}\t {item[1]}\t{item[2]}\t     {item[3]}\t\t{item[4]}')
+            print("----------------------------------------------------------------")
+
+        elif sel == 'n':
+            print("[조회취소]")
+        else:
+            print("잘못입력하셨습니다.")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
+def work_majorview():
+
+    try:
+        # 업무명 받기
+        show = input("근무를 조회하고 싶은 업무명을 입력해주세요 :")
+        print(f'조회하고 싶으신 업무의 이름이 {show} 맞습니까? y/n')
+        sel = input()
+        if sel == 'y':
+            print(
+                f'[   업무 명 : {show}                                        ]')
+            print("----------------------------------------------------------------")
+
+            # 컬럼명 뽑기
+            a = list()
+            i = 0
+            cur.execute(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='work'")
+            row = cur.fetchone()
+            while row:
+                a.insert(i, row[0])
+                row = cur.fetchone()
+                i += 1
+            print(a)
+
+            # 업무별 근무 표시
+            cur.execute(f'select * from work where majorName="{show}"')
+            rows = cur.fetchall()
+            for item in rows:
+                print(
+                    f'{item[0]}\t {item[1]}\t{item[2]}\t     {item[3]}\t\t{item[4]}')
+            print("----------------------------------------------------------------")
+
+        elif sel == 'n':
+            print("[조회취소]")
+        else:
+            print("잘못입력하셨습니다.")
+
+        print("돌아가시려면 아무키나 입력해주세요")
+        sel = input()
+    except pymysql.err.IntegrityError as e:
+        print(e)
+
+
 def managerpage():
     while (1):
-        print("-------------  DB 일용 근로 계약  -------------")
-        print(" [근무자 관리]                                 ")
-        print(" 1. 전체 근무자 조회                            ")
-        print(" 2. 전체 근무자별 급여 조회                     ")
-        print("                                                ")
-        print(" [근무 관리]                                   ")
-        print(" 3. 날짜별 근무 조회                            ")
-        print(" 4. 담당자 별 근무 조회                         ")
-        print(" 5. 근무자 별 근무 조회                         ")
-        print(" 6. 업무 별 근무 조회                          ")
-        print(" 7. 예약된 근무 조회                          ")
-        print("                                                ")
-        print(" [담당자 관리]                              ")
-        print(" 8.담당자 등록                                ")
-        print(" 9.업무별 담당자 조회                          ")
-        print(" 10.회사별 담당자 조회                          ")
-        print("                                                ")
-        print(" [회사 관리]                              ")
-        print(" 11.회사 등록                          ")
-        print(" 12.회사별 실적 조회                        ")
-        print("                                                ")
+        print("----------------------  DB 일용 근로 계약  ----------------------")
+        print(" [근무자 관리]                                                 ")
+        print(" 1. 전체 근무자 조회                2. 전체 근무자별 급여 조회    ")
+        print("")
+        print(" [근무 관리]                                                    ")
+        print(" 3. 날짜별 근무 조회                4. 담당자 별 근무 조회        ")
+        print(" 5. 근무자 별 근무 조회             6. 업무 별 근무 조회          ")
+        print(" 7. 예약된 근무 조회                                             ")
+        print("")
+        print(" [담당자 관리]                                                  ")
+        print(" 8.담당자 등록                      9.업무별 담당자 조회          ")
+        print(" 10.회사별 담당자 조회                                           ")
+        print("")
+        print(" [회사 관리]                                                     ")
+        print(" 11.회사 등록                       12.회사별 실적 조회           ")
+        print("")
         print(" [업무 관리]                              ")
-        print(" 13.업무 종류 조희                            ")
-        print(" 14.업무 가격 수정                            ")
-
-        print("                  99.종료하기                  ")
-        print("----------------------------------------------")
+        print(" 13.업무 종류 조희                   14.업무 가격 수정           ")
+        print("")
+        print("                            99.종료하기                          ")
+        print("----------------------------------------------------------------")
         m_menu = input("메뉴선택: ")
 
         if m_menu == '1':
-            break
+            worker_all()
         elif m_menu == '2':
-            break
+            worker_pay()
         elif m_menu == '3':
-            break
+            work_dayview()
         elif m_menu == '4':
-            break
+            work_managerview()
         elif m_menu == '5':
-            break
+            work_workerview()
         elif m_menu == '6':
-            break
+            work_majorview()
         elif m_menu == '7':
-            break
+            work_appointment_worker()
         elif m_menu == '8':
             break
         elif m_menu == '9':
@@ -345,6 +520,16 @@ def managerpage():
         elif m_menu == '99':
             break
     return 0
+
+
+def firstpage():
+    print("-------------  DB 일용 근로 계약  -------------")
+    print("                 1.근로자 전용                 ")
+    print("                 2.관리자 전용                 ")
+    print("                 99.사용 종료                  ")
+    print("----------------------------------------------")
+    menu = input("사용자 선택: ")
+    return int(menu)
 
 
 def run():
